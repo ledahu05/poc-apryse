@@ -16,6 +16,9 @@ const TabList = () => {
     console.log('TabList', activeTab);
     return (
         <div className='flex flex-col h-screen'>
+            <p class='mb-6 text-lg font-normal text-gray-500 lg:text-xl dark:text-gray-400'>
+                Single Instance of Webviewer
+            </p>
             <ul className='flex flex-wrap text-sm font-medium text-center text-gray-500 border-b border-gray-200 dark:border-gray-700 dark:text-gray-400'>
                 {tabs.map((tab) => (
                     <li
