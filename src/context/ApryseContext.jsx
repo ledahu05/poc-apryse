@@ -1,27 +1,33 @@
-import React, { createContext, useContext, useMemo, useState } from 'react';
+import React, {
+    createContext,
+    useContext,
+    useMemo,
+    useState,
+    useRef
+} from 'react';
 
 // Create a context
 const ApryseContext = createContext(null);
 import useCurrentTab from '../hooks/useCurrentTab';
 // Create a provider component
 export const ApryseProvider = ({ children }) => {
-    const [tabInstances, setTabInstances] = useState({});
+    const [tabData, setTabData] = useState({});
 
-    const setInstance = (tabId, instance) => {
-        setTabInstances((prevInstances) => ({
-            ...prevInstances,
-            [tabId]: instance
+    const setData = (tabId, data) => {
+        setTabData((prevData) => ({
+            ...prevData,
+            [tabId]: data
         }));
     };
 
-    console.log('tabInstances', tabInstances);
+    console.log('tabData finalViewerRef', tabData);
 
     const contextValue = useMemo(
         () => ({
-            tabInstances,
-            setInstance
+            tabData,
+            setData
         }),
-        [tabInstances]
+        [tabData]
     );
 
     return (
@@ -31,28 +37,28 @@ export const ApryseProvider = ({ children }) => {
     );
 };
 
-// Custom hook to access the context
-// export const useApryse = (tabId) => {
-
-//     const { tabInstances, setInstance } = useContext(ApryseContext);
-//     if (!tabInstances.hasOwnProperty(tabIndex)) {
-//         throw new Error('Tab instance not found');
-//     }
-//     return [tabInstances[tabIndex], setInstance.bind(null, tabIndex)];
-// };
-
 export const useApryse = (tabId) => {
     const currentTab = useCurrentTab();
-    const tabIndex = 'default';
-    const { tabInstances, setInstance } = useContext(ApryseContext);
+
+    const tabIndex = tabId || currentTab;
+    const { tabData, setData } = useContext(ApryseContext);
 
     const getInstance = () => {
-        if (!tabInstances.hasOwnProperty(tabIndex)) {
-            return null;
-            // setInstance(tabIndex, /* initial instance */); // You need to provide an initial instance here
+        if (!tabData.hasOwnProperty(tabIndex)) {
+            return {
+                instance: null,
+                viewerRef: null,
+                initializedRef: null
+            };
         }
-        return tabInstances[tabIndex];
+
+        return tabData[tabIndex];
     };
 
-    return [getInstance(), setInstance.bind(null, tabIndex)];
+    const setInstanceData = (data) => {
+        const clonedViewerRef = { ...data.viewerRef };
+        setData(tabIndex, { ...data, viewerRef: clonedViewerRef });
+    };
+
+    return [getInstance(), setInstanceData];
 };

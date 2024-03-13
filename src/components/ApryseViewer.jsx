@@ -5,21 +5,24 @@ import { useApryse } from '../context/ApryseContext';
 
 const ApryseViewer = ({ files, tabIndex }) => {
     const viewerRef = useRef(null);
-    const [instance, setInstance] = useApryse();
+    const [data, setInstanceData] = useApryse();
+    const { instance, viewerRef: contextViewerRef } = data || {};
+    const usedViewerRef = contextViewerRef || viewerRef;
     const beenInitialised = useRef(false);
     console.log('ApryseViewer files', files);
 
     useEffect(() => {
         async function loadDocuments() {
-            if (instance) {
-                // const allTabs = await instance.UI.TabManager.getAllTabs();
+            if (instance && instance.UI) {
+                const allTabs = await instance.UI.TabManager.getAllTabs();
 
-                // for (const tab of allTabs) {
-                //     await instance.UI.TabManager.deleteTab(tab.index);
-                // }
+                for (const tab of allTabs) {
+                    await instance.UI.TabManager.deleteTab(tab.index);
+                }
 
                 // After all tabs are deleted, add new tabs
                 files.forEach(({ filename, url }) => {
+                    console.log('filename', filename);
                     instance.UI.TabManager.addTab(url, {
                         filename: filename,
                         setActive: true
@@ -32,13 +35,24 @@ const ApryseViewer = ({ files, tabIndex }) => {
 
     console.log('ApryseViewer instance', instance);
     useEffect(() => {
-        if (!beenInitialised.current) {
-            beenInitialised.current = true;
+        // if (!instance && ) {
+        // if (
+        //     !beenInitialised.current
+        //     // && !USE_CASES_WITHOUT_APRYSE.includes(currentTab)
+        // ) {
+        // console.log('beenInitialised', beenInitialised.current);
+        // beenInitialised.current = true;
+        // setInstanceData({
+        //     instance: null,
+        //     viewerRef: finalViewerRef,
+        //     initializedRef: beenInitialised
+        //     // beenInitialised: hasBeenInitialised
+        // });
+        if (!instance) {
             WebViewer(
                 {
                     fullAPI: true,
-                    licenseKey:
-                        'demo:1710169127353:7f3d779a0300000000d154925f75cb63510fe00b60d0c6de40d80d0e6e',
+                    licenseKey: '',
                     path: '/webviewer/lib',
                     enableOfficeEditing: false,
                     disabledElements: [
@@ -88,18 +102,24 @@ const ApryseViewer = ({ files, tabIndex }) => {
                 // loadedInstance.UI.disableElements(['toolbarGroup-Shapes']);
                 // loadedInstance.UI.disableElements(['toolbarGroup-Edit']);
                 // loadedInstance.UI.disableElements(['toolbarGroup-Insert']);
-                setInstance(loadedInstance);
+                // setInstance(loadedInstance);
+                setInstanceData({
+                    instance: loadedInstance,
+                    viewerRef: viewerRef
+                });
             });
         }
-        // console.log('ApryseViewer instance', instance);
-        // if (instance) return;
-    }, []);
+        // }
+        // }
+        // if (!hasBeenInitialised.current) {
+        // }
+    }, [tabIndex]);
 
     return (
-        <div className='flex flex-col w-full flex-1'>
+        <div className='flex flex-col w-full flex-1' key={tabIndex}>
             <div
                 className='flex-1 w-full h-full overflow-hidden relative'
-                ref={viewerRef}
+                ref={usedViewerRef}
             ></div>
         </div>
     );
