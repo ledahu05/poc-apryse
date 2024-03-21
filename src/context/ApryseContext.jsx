@@ -20,7 +20,7 @@ export const ApryseProvider = ({ children }) => {
         }));
     };
 
-    console.log('tabData finalViewerRef', tabData);
+    console.log('tabData', tabData);
 
     const contextValue = useMemo(
         () => ({
@@ -56,8 +56,23 @@ export const useApryse = (tabId) => {
     };
 
     const setInstanceData = (data) => {
+        console.log('tabData setInstanceData', data);
         const clonedViewerRef = { ...data.viewerRef };
-        setData(tabIndex, { ...data, viewerRef: clonedViewerRef });
+        const clonedBeenInitialsedRef = { ...data.beenInitialisedRef };
+        console.log('tabData setInstanceData', {
+            clonedViewerRef,
+            clonedBeenInitialsedRef
+        });
+
+        const newRef = clonedViewerRef.current
+            ? { viewerRef: clonedViewerRef }
+            : {};
+
+        setData(tabIndex, {
+            ...data,
+            beenInitialisedRef: clonedBeenInitialsedRef,
+            ...newRef
+        });
     };
 
     return [getInstance(), setInstanceData];
