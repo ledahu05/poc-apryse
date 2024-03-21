@@ -39,6 +39,7 @@ export const ApryseProvider = ({ children }) => {
 
 export const useApryse = (tabId) => {
     const currentTab = useCurrentTab();
+    console.log('useApryse', currentTab);
 
     const tabIndex = tabId || currentTab;
     const { tabData, setData } = useContext(ApryseContext);

@@ -22,6 +22,20 @@ const ApryseViewer = ({ files, tabIndex }) => {
         tabIndex
     });
 
+    useEffect(() => {
+        if (!instance) return;
+        Array.from(files).forEach((file) => {
+            console.log('ApryseViewer file', file);
+            // const extension = file.extension; // Get the file extension
+            // const fileUrl = URL.createObjectURL(file); // Create URL for the file
+            instance.UI.TabManager.addTab(file.url, {
+                filename: file.filename,
+                setActive: true
+            });
+            // myFiles.push({ extension, fileUrl, filename: file.name });
+        });
+    }, [instance, files, tabIndex]);
+
     // useEffect(() => {
     //     async function loadDocuments() {
     //         if (instance && instance.UI) {
