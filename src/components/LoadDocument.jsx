@@ -8,7 +8,7 @@ import useAddFiles from '../hooks/useAddFiles';
 export default function LoadDocument() {
     const addFiles = useAddFiles();
     const { tabs, activeTab, addTab, removeTab, setActive } = useTabs();
-    const [instance] = useApryse();
+    // const [instance] = useApryse();
 
     async function handleFileSelect(event) {
         const files = event.target.files;

@@ -5,35 +5,63 @@ import { useApryse } from '../context/ApryseContext';
 
 const ApryseViewer = ({ files, tabIndex }) => {
     const viewerRef = useRef(null);
-    const [instance, setInstance] = useApryse();
     const beenInitialised = useRef(false);
-    console.log('ApryseViewer files', files);
+    const [data, setInstanceData] = useApryse();
+    const {
+        instance,
+        viewerRef: contextViewerRef,
+        beenInitialisedRef: contextBeenInitialisedRef
+    } = data || {};
+    const usedViewerRef = contextViewerRef || viewerRef;
+    const usedBeenInitialsedRef = contextBeenInitialisedRef || beenInitialised;
+
+    console.log('ApryseViewer files', {
+        usedViewerRef,
+        instance,
+        files,
+        tabIndex
+    });
 
     useEffect(() => {
-        async function loadDocuments() {
-            if (instance) {
-                // const allTabs = await instance.UI.TabManager.getAllTabs();
-
-                // for (const tab of allTabs) {
-                //     await instance.UI.TabManager.deleteTab(tab.index);
-                // }
-
-                // After all tabs are deleted, add new tabs
-                files.forEach(({ filename, url }) => {
-                    instance.UI.TabManager.addTab(url, {
-                        filename: filename,
-                        setActive: true
-                    });
-                });
-            }
-        }
-        loadDocuments();
+        if (!instance) return;
+        Array.from(files).forEach((file) => {
+            console.log('ApryseViewer file', file);
+            // const extension = file.extension; // Get the file extension
+            // const fileUrl = URL.createObjectURL(file); // Create URL for the file
+            instance.UI.TabManager.addTab(file.url, {
+                filename: file.filename,
+                setActive: true
+            });
+            // myFiles.push({ extension, fileUrl, filename: file.name });
+        });
     }, [instance, files, tabIndex]);
+
+    // useEffect(() => {
+    //     async function loadDocuments() {
+    //         if (instance && instance.UI) {
+    //             const allTabs = await instance.UI.TabManager.getAllTabs();
+
+    //             for (const tab of allTabs) {
+    //                 await instance.UI.TabManager.deleteTab(tab.index);
+    //             }
+
+    //             // After all tabs are deleted, add new tabs
+    //             files.forEach(({ filename, url }) => {
+    //                 console.log('filename', filename);
+    //                 instance.UI.TabManager.addTab(url, {
+    //                     filename: filename,
+    //                     setActive: true
+    //                 });
+    //             });
+    //         }
+    //     }
+    //     loadDocuments();
+    // }, [instance, files, tabIndex]);
 
     console.log('ApryseViewer instance', instance);
     useEffect(() => {
-        if (!beenInitialised.current) {
-            beenInitialised.current = true;
+        if (!usedBeenInitialsedRef.current) {
+            usedBeenInitialsedRef.current = true;
             WebViewer(
                 {
                     fullAPI: true,
@@ -72,34 +100,30 @@ const ApryseViewer = ({ files, tabIndex }) => {
                         'menuButton'
                     ]
                 },
-                viewerRef.current
+                usedViewerRef.current
             ).then((loadedInstance) => {
                 loadedInstance.UI.enableFeatures([
                     loadedInstance.UI.Feature.MultiTab
                 ]);
                 loadedInstance.UI.setHeaderItems(function (header) {
-                    // this depends on the version of WebViewer. You'll want to remove the "divider" object
-                    // the "divider" should be at position 1 in version 8.8
                     header.headers.default.splice(1, 10);
                 });
-                // loadedInstance.UI.disableElements(['header']);
-                // loadedInstance.UI.disableElements(['ribbons']);
-                // loadedInstance.UI.disableElements(['toolsHeader']);
-                // loadedInstance.UI.disableElements(['toolbarGroup-Shapes']);
-                // loadedInstance.UI.disableElements(['toolbarGroup-Edit']);
-                // loadedInstance.UI.disableElements(['toolbarGroup-Insert']);
-                setInstance(loadedInstance);
+
+                // setInstance(loadedInstance);
+                setInstanceData({
+                    instance: { ...loadedInstance },
+                    viewerRef: usedViewerRef,
+                    beenInitialisedRef: usedBeenInitialsedRef
+                });
             });
         }
-        // console.log('ApryseViewer instance', instance);
-        // if (instance) return;
-    }, []);
+    }, [tabIndex]);
 
     return (
-        <div className='flex flex-col w-full flex-1'>
+        <div className='flex flex-col w-full flex-1' key={tabIndex}>
             <div
-                className='flex-1 w-full h-full overflow-hidden relative'
-                ref={viewerRef}
+                className={`flex-1 w-full h-full overflow-hidden relative ${tabIndex}`}
+                ref={usedViewerRef}
             ></div>
         </div>
     );
